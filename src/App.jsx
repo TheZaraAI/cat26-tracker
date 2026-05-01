@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { isConfigured } from "./api/airtable";
 import { useAirtable } from "./hooks/useAirtable";
 import { exportToExcel } from "./utils/exportExcel";
@@ -31,12 +31,51 @@ VITE_BASE_ID=app...`}
   );
 }
 
+// ---------- Add Dropdown ----------
+function AddDropdown({ onAddInitiative, onAddSubtask }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div className="add-dropdown-wrap" ref={ref}>
+      <button className="btn btn-primary" onClick={() => setOpen(!open)}>
+        + Add
+      </button>
+      {open && (
+        <div className="add-dropdown-menu">
+          <button
+            className="add-dropdown-item"
+            onClick={() => { setOpen(false); onAddInitiative(); }}
+          >
+            Add Initiative
+          </button>
+          <button
+            className="add-dropdown-item"
+            onClick={() => { setOpen(false); onAddSubtask(); }}
+          >
+            Add Subtask
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ---------- Main App ----------
 export default function App() {
   if (!isConfigured()) return <SetupScreen />;
 
   const {
     initiatives,
+    subtasks,
     lastSync,
     loading,
     error,
@@ -48,12 +87,16 @@ export default function App() {
     addRecord,
     removeRecord,
     seed,
+    addSubtask,
+    updateSubtaskRecord,
+    removeSubtask,
   } = useAirtable();
 
   const [activeTab, setActiveTab] = useState("All");
   const [filters, setFilters] = useState({ priority: new Set(), status: new Set() });
   const [editRecord, setEditRecord] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [showAddSubtask, setShowAddSubtask] = useState(false);
 
   // Filter initiatives
   const filtered = useMemo(() => {
@@ -108,9 +151,10 @@ export default function App() {
           <button className="btn btn-secondary" onClick={() => exportToExcel(initiatives)}>
             Export Excel
           </button>
-          <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-            + Add
-          </button>
+          <AddDropdown
+            onAddInitiative={() => setShowAdd(true)}
+            onAddSubtask={() => setShowAddSubtask(true)}
+          />
         </div>
       </header>
 
@@ -145,6 +189,10 @@ export default function App() {
           pendingIds={pendingIds}
           onStatusChange={updateStatus}
           onEdit={setEditRecord}
+          subtasks={subtasks}
+          onAddSubtask={addSubtask}
+          onUpdateSubtask={updateSubtaskRecord}
+          onDeleteSubtask={removeSubtask}
         />
       )}
       {(activeTab === "All" || activeTab === "Video RAG") && (
@@ -154,6 +202,10 @@ export default function App() {
           pendingIds={pendingIds}
           onStatusChange={updateStatus}
           onEdit={setEditRecord}
+          subtasks={subtasks}
+          onAddSubtask={addSubtask}
+          onUpdateSubtask={updateSubtaskRecord}
+          onDeleteSubtask={removeSubtask}
         />
       )}
 
@@ -165,10 +217,14 @@ export default function App() {
           onDelete={removeRecord}
           onClose={() => setEditRecord(null)}
           isNew={false}
+          subtasks={subtasks}
+          onAddSubtask={addSubtask}
+          onUpdateSubtask={updateSubtaskRecord}
+          onDeleteSubtask={removeSubtask}
         />
       )}
 
-      {/* Add modal */}
+      {/* Add initiative modal */}
       {showAdd && (
         <EditModal
           record={null}
@@ -176,6 +232,20 @@ export default function App() {
           onDelete={() => {}}
           onClose={() => setShowAdd(false)}
           isNew={true}
+        />
+      )}
+
+      {/* Add subtask modal */}
+      {showAddSubtask && (
+        <EditModal
+          record={null}
+          onSave={() => {}}
+          onDelete={() => {}}
+          onClose={() => setShowAddSubtask(false)}
+          isNew={true}
+          mode="subtask"
+          initiatives={initiatives}
+          onAddSubtask={addSubtask}
         />
       )}
     </div>

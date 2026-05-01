@@ -5,6 +5,10 @@ import {
   createInitiative,
   deleteInitiative,
   seedRecords,
+  fetchSubtasks,
+  createSubtask as apiCreateSubtask,
+  updateSubtask as apiUpdateSubtask,
+  deleteSubtask as apiDeleteSubtask,
 } from "../api/airtable";
 
 const POLL_INTERVAL = 30_000; // 30 seconds
@@ -84,6 +88,7 @@ const SEED_DATA = [
 
 export function useAirtable() {
   const [initiatives, setInitiatives] = useState([]);
+  const [subtasks, setSubtasks] = useState([]);
   const [lastSync, setLastSync] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -92,8 +97,12 @@ export function useAirtable() {
 
   const refresh = useCallback(async () => {
     try {
-      const data = await fetchInitiatives();
-      setInitiatives(data);
+      const [initData, subtaskData] = await Promise.all([
+        fetchInitiatives(),
+        fetchSubtasks().catch(() => []), // graceful fallback if Subtasks table doesn't exist yet
+      ]);
+      setInitiatives(initData);
+      setSubtasks(subtaskData);
       setLastSync(new Date());
       setError(null);
     } catch (err) {
@@ -129,7 +138,7 @@ export function useAirtable() {
       setLastSync(new Date());
       setError(null);
     } catch (err) {
-      // Revert — re-fetch to get truth
+      // Revert -- re-fetch to get truth
       setError(err.message);
       await refresh();
     } finally {
@@ -213,8 +222,50 @@ export function useAirtable() {
     }
   }, []);
 
+  // ---- Subtask operations ----
+
+  const addSubtask = useCallback(async (fields) => {
+    try {
+      const created = await apiCreateSubtask(fields);
+      setSubtasks((prev) => [...prev, created]);
+      setLastSync(new Date());
+      setError(null);
+      return created;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
+  const updateSubtaskRecord = useCallback(async (recordId, fields) => {
+    try {
+      const updated = await apiUpdateSubtask(recordId, fields);
+      setSubtasks((prev) =>
+        prev.map((s) => (s.id === recordId ? updated : s))
+      );
+      setLastSync(new Date());
+      setError(null);
+      return updated;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
+  const removeSubtask = useCallback(async (recordId) => {
+    try {
+      await apiDeleteSubtask(recordId);
+      setSubtasks((prev) => prev.filter((s) => s.id !== recordId));
+      setLastSync(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  }, []);
+
   return {
     initiatives,
+    subtasks,
     lastSync,
     loading,
     error,
@@ -226,5 +277,8 @@ export function useAirtable() {
     addRecord,
     removeRecord,
     seed,
+    addSubtask,
+    updateSubtaskRecord,
+    removeSubtask,
   };
 }

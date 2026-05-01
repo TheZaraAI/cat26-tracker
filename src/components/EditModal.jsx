@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { shortDate } from "../utils/dateHelpers";
 
 const WORKSTREAMS = ["TA50", "Video RAG"];
 const PRIORITIES = ["P1", "P2", "P3"];
 const STATUSES = ["Not started", "In progress", "Blocked", "Completed", "Planning"];
+const SUBTASK_STATUSES = ["Not Started", "In Progress", "On Hold", "Completed"];
 
 const EMPTY = {
   Name: "",
@@ -16,11 +18,47 @@ const EMPTY = {
   Notes: "",
 };
 
-export default function EditModal({ record, onSave, onDelete, onClose, isNew }) {
+const EMPTY_SUBTASK = {
+  Name: "",
+  Status: "Not Started",
+  DRI: "",
+  "Due Date": "",
+  Notes: "",
+};
+
+export default function EditModal({
+  record,
+  onSave,
+  onDelete,
+  onClose,
+  isNew,
+  // Subtask mode props
+  mode = "initiative", // "initiative" | "subtask"
+  initiatives = [],
+  // Subtask management within initiative edit
+  subtasks = [],
+  onAddSubtask,
+  onUpdateSubtask,
+  onDeleteSubtask,
+}) {
   const [form, setForm] = useState(EMPTY);
+  const [subtaskForm, setSubtaskForm] = useState({ ...EMPTY_SUBTASK, "Parent Initiative": "" });
   const [saving, setSaving] = useState(false);
+  const [showSubtaskAdd, setShowSubtaskAdd] = useState(false);
+  const [editingSubtask, setEditingSubtask] = useState(null);
 
   useEffect(() => {
+    if (mode === "subtask") {
+      setSubtaskForm({
+        Name: "",
+        Status: "Not Started",
+        DRI: "",
+        "Due Date": "",
+        Notes: "",
+        "Parent Initiative": initiatives.length > 0 ? initiatives[0].id : "",
+      });
+      return;
+    }
     if (record) {
       setForm({
         Name: record.Name || "",
@@ -36,12 +74,17 @@ export default function EditModal({ record, onSave, onDelete, onClose, isNew }) 
     } else {
       setForm(EMPTY);
     }
-  }, [record]);
+  }, [record, mode, initiatives]);
 
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function handleSubtaskFormChange(field, value) {
+    setSubtaskForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  // Submit initiative
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.Name.trim()) return;
@@ -52,9 +95,28 @@ export default function EditModal({ record, onSave, onDelete, onClose, isNew }) 
         ...form,
         "Days Needed": form["Days Needed"] !== "" ? Number(form["Days Needed"]) : undefined,
       };
-      // Remove undefined
       Object.keys(fields).forEach((k) => fields[k] === undefined && delete fields[k]);
       await onSave(fields);
+      onClose();
+    } catch {
+      // error handled by hook
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // Submit subtask (when mode === "subtask")
+  async function handleSubtaskSubmit(e) {
+    e.preventDefault();
+    if (!subtaskForm.Name.trim() || !subtaskForm["Parent Initiative"]) return;
+
+    setSaving(true);
+    try {
+      const fields = { ...subtaskForm };
+      if (!fields["Due Date"]) delete fields["Due Date"];
+      if (!fields.Notes) delete fields.Notes;
+      if (!fields.DRI) delete fields.DRI;
+      await onAddSubtask(fields);
       onClose();
     } catch {
       // error handled by hook
@@ -75,6 +137,114 @@ export default function EditModal({ record, onSave, onDelete, onClose, isNew }) 
       setSaving(false);
     }
   }
+
+  // Inline subtask add within initiative edit
+  async function handleInlineSubtaskAdd() {
+    if (!editingSubtask || !editingSubtask.Name.trim()) return;
+    try {
+      const fields = {
+        Name: editingSubtask.Name,
+        "Parent Initiative": record.id,
+        Status: editingSubtask.Status || "Not Started",
+        DRI: editingSubtask.DRI || "",
+      };
+      if (editingSubtask["Due Date"]) fields["Due Date"] = editingSubtask["Due Date"];
+      if (editingSubtask.Notes) fields.Notes = editingSubtask.Notes;
+      await onAddSubtask(fields);
+      setEditingSubtask(null);
+      setShowSubtaskAdd(false);
+    } catch {
+      // error handled by hook
+    }
+  }
+
+  // --- Subtask mode rendering ---
+  if (mode === "subtask") {
+    return (
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2>Add Subtask</h2>
+            <button className="modal-close" onClick={onClose}>&times;</button>
+          </div>
+          <form onSubmit={handleSubtaskSubmit}>
+            <div className="form-group">
+              <label>Parent Initiative *</label>
+              <select
+                value={subtaskForm["Parent Initiative"]}
+                onChange={(e) => handleSubtaskFormChange("Parent Initiative", e.target.value)}
+                required
+              >
+                <option value="">Select initiative...</option>
+                {initiatives.map((init) => (
+                  <option key={init.id} value={init.id}>{init.Name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Name *</label>
+              <input
+                type="text"
+                value={subtaskForm.Name}
+                onChange={(e) => handleSubtaskFormChange("Name", e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Status</label>
+                <select
+                  value={subtaskForm.Status}
+                  onChange={(e) => handleSubtaskFormChange("Status", e.target.value)}
+                >
+                  {SUBTASK_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>DRI</label>
+                <input
+                  type="text"
+                  value={subtaskForm.DRI}
+                  onChange={(e) => handleSubtaskFormChange("DRI", e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label>Due Date</label>
+                <input
+                  type="date"
+                  value={subtaskForm["Due Date"]}
+                  onChange={(e) => handleSubtaskFormChange("Due Date", e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Notes</label>
+              <textarea
+                rows={3}
+                value={subtaskForm.Notes}
+                onChange={(e) => handleSubtaskFormChange("Notes", e.target.value)}
+              />
+            </div>
+            <div className="modal-actions">
+              <div />
+              <div className="modal-actions-right">
+                <button type="button" className="btn btn-secondary" onClick={onClose}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={saving}>
+                  {saving ? "Saving..." : "Create Subtask"}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Initiative mode rendering ---
+  const initSubtasks = subtasks.filter((s) => s["Parent Initiative"] === record?.id);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -172,6 +342,113 @@ export default function EditModal({ record, onSave, onDelete, onClose, isNew }) 
               onChange={(e) => handleChange("Notes", e.target.value)}
             />
           </div>
+
+          {/* Subtasks section (only when editing existing initiative) */}
+          {!isNew && record && (
+            <div className="modal-subtasks">
+              <div className="modal-subtasks-header">
+                <label>Subtasks ({initSubtasks.length})</label>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-xs"
+                  onClick={() => {
+                    setShowSubtaskAdd(true);
+                    setEditingSubtask({ Name: "", Status: "Not Started", DRI: "", "Due Date": "", Notes: "" });
+                  }}
+                >
+                  + Add
+                </button>
+              </div>
+
+              {initSubtasks.length > 0 && (
+                <div className="modal-subtask-list">
+                  {initSubtasks.map((st) => (
+                    <div key={st.id} className="modal-subtask-item">
+                      <div className="modal-subtask-info">
+                        <span className={`modal-subtask-status-dot ${st.Status === "Completed" ? "dot-completed" : st.Status === "In Progress" ? "dot-progress" : st.Status === "On Hold" ? "dot-hold" : "dot-default"}`} />
+                        <span className="modal-subtask-name">{st.Name}</span>
+                      </div>
+                      <div className="modal-subtask-meta">
+                        {st.DRI && <span className="modal-subtask-dri">{st.DRI}</span>}
+                        {st["Due Date"] && <span className="modal-subtask-date">{shortDate(st["Due Date"])}</span>}
+                        <select
+                          className="status-select status-select-xs"
+                          value={st.Status || "Not Started"}
+                          onChange={(e) => onUpdateSubtask(st.id, { Status: e.target.value })}
+                        >
+                          {SUBTASK_STATUSES.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          className="subtask-delete-btn"
+                          onClick={() => onDeleteSubtask(st.id)}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {showSubtaskAdd && editingSubtask && (
+                <div className="modal-subtask-add-form">
+                  <div className="form-group">
+                    <input
+                      type="text"
+                      placeholder="Subtask name..."
+                      value={editingSubtask.Name}
+                      onChange={(e) => setEditingSubtask({ ...editingSubtask, Name: e.target.value })}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <select
+                        value={editingSubtask.Status}
+                        onChange={(e) => setEditingSubtask({ ...editingSubtask, Status: e.target.value })}
+                      >
+                        {SUBTASK_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <input
+                        type="text"
+                        placeholder="DRI"
+                        value={editingSubtask.DRI}
+                        onChange={(e) => setEditingSubtask({ ...editingSubtask, DRI: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        value={editingSubtask["Due Date"]}
+                        onChange={(e) => setEditingSubtask({ ...editingSubtask, "Due Date": e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="modal-subtask-add-actions">
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-xs"
+                      onClick={handleInlineSubtaskAdd}
+                    >
+                      Add Subtask
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-xs"
+                      onClick={() => { setShowSubtaskAdd(false); setEditingSubtask(null); }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="modal-actions">
             {!isNew && (

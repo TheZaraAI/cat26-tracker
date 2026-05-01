@@ -146,6 +146,47 @@ body {
 .btn-danger:hover:not(:disabled) {
   background: #5B1A1A;
 }
+.btn-xs {
+  padding: 3px 10px;
+  font-size: 0.75rem;
+}
+
+/* ---- Add Dropdown ---- */
+.add-dropdown-wrap {
+  position: relative;
+  display: inline-block;
+}
+.add-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  min-width: 170px;
+  overflow: hidden;
+  animation: fadeIn 0.1s ease;
+}
+.add-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.add-dropdown-item:hover {
+  background: var(--bg-hover);
+}
+.add-dropdown-item + .add-dropdown-item {
+  border-top: 1px solid var(--border);
+}
 
 /* ---- Exec Dashboard ---- */
 .exec-dashboard {
@@ -347,6 +388,14 @@ body {
   background: var(--bg-tertiary);
   border-bottom: 1px solid var(--border);
 }
+.init-table thead th.col-expand {
+  width: 32px;
+  padding: 10px 8px 10px 14px;
+}
+.init-table thead th.col-id {
+  width: 130px;
+  white-space: nowrap;
+}
 .init-table tbody tr {
   border-bottom: 1px solid var(--border);
   cursor: pointer;
@@ -362,6 +411,23 @@ body {
   padding: 10px 14px;
   font-size: 0.85rem;
   vertical-align: middle;
+}
+.cell-expand {
+  width: 32px;
+  padding: 10px 8px 10px 14px !important;
+  cursor: pointer;
+}
+.expand-arrow {
+  display: inline-block;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+}
+.expand-arrow-open {
+  transform: rotate(90deg);
+}
+.cell-id {
+  white-space: nowrap;
 }
 .cell-name {
   font-weight: 500;
@@ -388,6 +454,140 @@ body {
 }
 .row-past-due {
   border-left: 3px solid var(--danger);
+}
+.row-expanded {
+  background: rgba(59, 130, 246, 0.04);
+}
+
+/* ---- ID Badges ---- */
+.id-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
+  letter-spacing: 0.06em;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.id-badge-victor {
+  background: rgba(139, 92, 246, 0.15);
+  color: #A78BFA;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+.id-badge-tango {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60A5FA;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* ---- Subtask Count Badge ---- */
+.subtask-count-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  padding: 0px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* ---- Subtask Rows ---- */
+.subtask-row {
+  background: var(--bg-primary) !important;
+  cursor: default !important;
+}
+.subtask-row:hover {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+.subtask-indent-cell {
+  padding-left: 28px !important;
+}
+.subtask-indent-marker {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background: var(--border-light);
+  border-radius: 1px;
+  vertical-align: middle;
+}
+.subtask-name-cell {
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+.subtask-bullet {
+  color: var(--text-muted);
+  margin-right: 6px;
+  font-size: 0.7rem;
+}
+.subtask-delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color var(--transition);
+}
+.subtask-delete-btn:hover {
+  color: var(--danger);
+}
+.status-select-sm {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+}
+.status-select-xs {
+  font-size: 0.7rem;
+  padding: 2px 4px;
+}
+
+/* ---- Subtask inline add ---- */
+.subtask-add-row {
+  border-bottom: none !important;
+}
+.subtask-add-inline {
+  padding-left: 40px;
+}
+.subtask-add-btn {
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.subtask-add-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.subtask-quick-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.subtask-quick-input {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-family: inherit;
+  flex: 1;
+  max-width: 300px;
+}
+.subtask-quick-input:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 /* ---- Status Select ---- */
@@ -464,6 +664,91 @@ body {
 }
 .modal-close:hover {
   color: var(--text-primary);
+}
+
+/* ---- Modal Subtasks Section ---- */
+.modal-subtasks {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.modal-subtasks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.modal-subtasks-header label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.modal-subtask-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.modal-subtask-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  gap: 8px;
+}
+.modal-subtask-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.modal-subtask-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-completed { background: var(--success); }
+.dot-progress { background: var(--accent); }
+.dot-hold { background: var(--danger); }
+.dot-default { background: var(--text-muted); }
+.modal-subtask-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.modal-subtask-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.modal-subtask-dri {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.modal-subtask-date {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.modal-subtask-add-form {
+  padding: 10px;
+  background: var(--bg-primary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  margin-top: 8px;
+}
+.modal-subtask-add-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 /* ---- Form ---- */
@@ -596,6 +881,7 @@ body {
   .init-table { font-size: 0.8rem; }
   .init-table td, .init-table th { padding: 8px 10px; }
   .cell-name { max-width: 200px; }
+  .id-badge { font-size: 0.65rem; padding: 1px 5px; }
 }
 
 @media (max-width: 480px) {

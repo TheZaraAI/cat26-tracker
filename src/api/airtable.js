@@ -10,6 +10,7 @@
 const TOKEN = import.meta.env.VITE_AIRTABLE_TOKEN;
 const BASE_ID = import.meta.env.VITE_BASE_ID;
 const TABLE_NAME = "Initiatives";
+const SUBTASKS_TABLE = "Subtasks";
 const API_ROOT = "https://api.airtable.com/v0";
 
 // --- Priority mapping: Airtable <-> UI ---
@@ -90,8 +91,8 @@ function headers() {
   };
 }
 
-function url(path = "") {
-  return `${API_ROOT}/${BASE_ID}/${encodeURIComponent(TABLE_NAME)}${path}`;
+function url(path = "", table = TABLE_NAME) {
+  return `${API_ROOT}/${BASE_ID}/${encodeURIComponent(table)}${path}`;
 }
 
 /**
@@ -105,7 +106,7 @@ export async function fetchInitiatives() {
     const params = new URLSearchParams();
     if (offset) params.set("offset", offset);
 
-    const res = await fetch(`${url()}?${params}`, { headers: headers() });
+    const res = await fetch(`${url("", TABLE_NAME)}?${params}`, { headers: headers() });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.error?.message || `Airtable ${res.status}`);
@@ -125,7 +126,7 @@ export async function fetchInitiatives() {
  * Update a single record field(s) with PATCH.
  */
 export async function updateInitiative(recordId, fields) {
-  const res = await fetch(url(), {
+  const res = await fetch(url("", TABLE_NAME), {
     method: "PATCH",
     headers: headers(),
     body: JSON.stringify({
@@ -147,7 +148,7 @@ export async function updateInitiative(recordId, fields) {
  * Create a new initiative record.
  */
 export async function createInitiative(fields) {
-  const res = await fetch(url(), {
+  const res = await fetch(url("", TABLE_NAME), {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({
@@ -172,7 +173,7 @@ export async function deleteInitiative(recordId) {
   const params = new URLSearchParams();
   params.set("records[]", recordId);
 
-  const res = await fetch(`${url()}?${params}`, {
+  const res = await fetch(`${url("", TABLE_NAME)}?${params}`, {
     method: "DELETE",
     headers: headers(),
   });
@@ -189,7 +190,7 @@ export async function deleteInitiative(recordId) {
  * Seed all default records in a single batch (max 10).
  */
 export async function seedRecords(records) {
-  const res = await fetch(url(), {
+  const res = await fetch(url("", TABLE_NAME), {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({
@@ -204,4 +205,99 @@ export async function seedRecords(records) {
 
   const data = await res.json();
   return data.records.map((r) => ({ id: r.id, ...fromAirtable(r.fields) }));
+}
+
+// =====================================================================
+// Subtask CRUD
+// =====================================================================
+
+/**
+ * Fetch all subtask records (handles pagination).
+ */
+export async function fetchSubtasks() {
+  let allRecords = [];
+  let offset = undefined;
+
+  do {
+    const params = new URLSearchParams();
+    if (offset) params.set("offset", offset);
+
+    const res = await fetch(`${url("", SUBTASKS_TABLE)}?${params}`, { headers: headers() });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error?.message || `Airtable ${res.status}`);
+    }
+
+    const data = await res.json();
+    allRecords = allRecords.concat(
+      data.records.map((r) => ({ id: r.id, ...r.fields }))
+    );
+    offset = data.offset;
+  } while (offset);
+
+  return allRecords;
+}
+
+/**
+ * Create a new subtask record.
+ */
+export async function createSubtask(fields) {
+  const res = await fetch(url("", SUBTASKS_TABLE), {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({
+      records: [{ fields }],
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error?.message || `Airtable ${res.status}`);
+  }
+
+  const data = await res.json();
+  const r = data.records[0];
+  return { id: r.id, ...r.fields };
+}
+
+/**
+ * Update a subtask record.
+ */
+export async function updateSubtask(recordId, fields) {
+  const res = await fetch(url("", SUBTASKS_TABLE), {
+    method: "PATCH",
+    headers: headers(),
+    body: JSON.stringify({
+      records: [{ id: recordId, fields }],
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error?.message || `Airtable ${res.status}`);
+  }
+
+  const data = await res.json();
+  const r = data.records[0];
+  return { id: r.id, ...r.fields };
+}
+
+/**
+ * Delete a subtask record by ID.
+ */
+export async function deleteSubtask(recordId) {
+  const params = new URLSearchParams();
+  params.set("records[]", recordId);
+
+  const res = await fetch(`${url("", SUBTASKS_TABLE)}?${params}`, {
+    method: "DELETE",
+    headers: headers(),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error?.message || `Airtable ${res.status}`);
+  }
+
+  return true;
 }

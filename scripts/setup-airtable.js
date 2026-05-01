@@ -3,9 +3,8 @@
  * CAT26 Airtable Setup Script
  *
  * Works with the EXISTING Airtable base (appbH0ung2ZJqkZOf).
- * Seeds initiative records into the "Initiatives" table using the
- * actual Airtable field names: "Project Name", Critical/High/Medium/Low
- * priority, and Not Started/In Progress/On Hold/Completed/Planning status.
+ * Seeds initiative records into the "Initiatives" table and creates
+ * the "Subtasks" table if it does not already exist.
  *
  * Usage:
  *   AIRTABLE_TOKEN=pat... node scripts/setup-airtable.js
@@ -85,11 +84,71 @@ async function verifyBase() {
   }
   console.log(`  Found table "${table.name}" (${table.id})`);
   console.log(`  Fields: ${table.fields.map((f) => f.name).join(", ")}`);
-  return table;
+
+  const subtasksTable = body.tables.find((t) => t.name === "Subtasks");
+  return { initiativesTable: table, subtasksTable, allTables: body.tables };
 }
 
 // ---------------------------------------------------------------------------
-// 2. Seed Records (uses actual Airtable field names)
+// 2. Create Subtasks Table
+// ---------------------------------------------------------------------------
+async function createSubtasksTable() {
+  console.log('\nCreating "Subtasks" table...');
+  const body = await airtableFetch(`/meta/bases/${BASE_ID}/tables`, {
+    method: "POST",
+    body: JSON.stringify({
+      name: "Subtasks",
+      description: "Subtasks for CAT26 initiatives",
+      fields: [
+        {
+          name: "Name",
+          type: "singleLineText",
+          description: "Subtask name",
+        },
+        {
+          name: "Parent Initiative",
+          type: "singleLineText",
+          description: "Record ID of the parent initiative",
+        },
+        {
+          name: "Status",
+          type: "singleSelect",
+          options: {
+            choices: [
+              { name: "Not Started", color: "yellowLight2" },
+              { name: "In Progress", color: "blueLight2" },
+              { name: "On Hold", color: "redLight2" },
+              { name: "Completed", color: "greenLight2" },
+            ],
+          },
+        },
+        {
+          name: "DRI",
+          type: "singleLineText",
+          description: "Directly Responsible Individual",
+        },
+        {
+          name: "Notes",
+          type: "multilineText",
+        },
+        {
+          name: "Due Date",
+          type: "date",
+          options: {
+            dateFormat: { name: "iso" },
+          },
+        },
+      ],
+    }),
+  });
+
+  console.log(`  Created table "${body.name}" (${body.id})`);
+  console.log(`  Fields: ${body.fields.map((f) => f.name).join(", ")}`);
+  return body;
+}
+
+// ---------------------------------------------------------------------------
+// 3. Seed Records (uses actual Airtable field names)
 // ---------------------------------------------------------------------------
 const SEED_RECORDS = [
   {
@@ -182,7 +241,14 @@ async function main() {
   console.log("=== CAT26 Airtable Setup ===\n");
   console.log(`Using existing base: ${BASE_ID}\n`);
 
-  await verifyBase();
+  const { subtasksTable } = await verifyBase();
+
+  // Create Subtasks table if it doesn't exist
+  if (subtasksTable) {
+    console.log(`\n  "Subtasks" table already exists (${subtasksTable.id}). Skipping creation.`);
+  } else {
+    await createSubtasksTable();
+  }
 
   const args = process.argv.slice(2);
   if (args.includes("--seed")) {
