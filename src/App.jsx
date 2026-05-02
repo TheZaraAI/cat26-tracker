@@ -90,6 +90,7 @@ export default function App() {
     addSubtask,
     updateSubtaskRecord,
     removeSubtask,
+    teamMembers,
   } = useAirtable();
 
   const [activeTab, setActiveTab] = useState("All");
@@ -217,6 +218,7 @@ export default function App() {
           onDelete={removeRecord}
           onClose={() => setEditRecord(null)}
           isNew={false}
+          teamMembers={teamMembers}
           subtasks={subtasks}
           onAddSubtask={addSubtask}
           onUpdateSubtask={updateSubtaskRecord}
@@ -232,6 +234,7 @@ export default function App() {
           onDelete={() => {}}
           onClose={() => setShowAdd(false)}
           isNew={true}
+          teamMembers={teamMembers}
         />
       )}
 
@@ -245,6 +248,7 @@ export default function App() {
           isNew={true}
           mode="subtask"
           milestones={initiatives}
+          teamMembers={teamMembers}
           onAddSubtask={addSubtask}
         />
       )}

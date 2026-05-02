@@ -91,8 +91,25 @@ function headers() {
   };
 }
 
+const TEAM_MEMBERS_TABLE = "Team%20Members";
+
 function url(path = "", table = TABLE_NAME) {
   return `${API_ROOT}/${BASE_ID}/${encodeURIComponent(table)}${path}`;
+}
+
+/**
+ * Fetch team members for DRI dropdown.
+ */
+export async function fetchTeamMembers() {
+  const res = await fetch(`${API_ROOT}/${BASE_ID}/${TEAM_MEMBERS_TABLE}`, { headers: headers() });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.records.map((r) => ({
+    id: r.id,
+    name: r.fields.Name || "",
+    role: r.fields.Role || "",
+    username: r.fields["GitLab Username"] || "",
+  }));
 }
 
 /**

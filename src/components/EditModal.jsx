@@ -35,6 +35,7 @@ export default function EditModal({
   // Subtask mode props
   mode = "milestone", // "milestone" | "subtask"
   milestones = [],
+  teamMembers = [],
   // Subtask management within initiative edit
   subtasks = [],
   onAddSubtask,
@@ -55,7 +56,7 @@ export default function EditModal({
         DRI: "",
         "Due Date": "",
         Notes: "",
-        "Parent Milestone": milestones.length > 0 ? milestones[0].id : "",
+        "Parent Milestone": milestones.length > 0 ? milestones[0].Name : "",
       });
       return;
     }
@@ -144,7 +145,7 @@ export default function EditModal({
     try {
       const fields = {
         Name: editingSubtask.Name,
-        "Parent Milestone": record.id,
+        "Parent Milestone": record.Name,
         Status: editingSubtask.Status || "Not Started",
         DRI: editingSubtask.DRI || "",
       };
@@ -177,7 +178,7 @@ export default function EditModal({
               >
                 <option value="">Select milestone...</option>
                 {milestones.map((ms) => (
-                  <option key={ms.id} value={ms.id}>{ms.Name}</option>
+                  <option key={ms.id} value={ms.Name}>{ms.Name}</option>
                 ))}
               </select>
             </div>
@@ -203,11 +204,15 @@ export default function EditModal({
               </div>
               <div className="form-group">
                 <label>DRI</label>
-                <input
-                  type="text"
+                <select
                   value={subtaskForm.DRI}
                   onChange={(e) => handleSubtaskFormChange("DRI", e.target.value)}
-                />
+                >
+                  <option value="">— Select DRI —</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.id} value={m.name}>{m.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label>Due Date</label>
@@ -244,7 +249,7 @@ export default function EditModal({
   }
 
   // --- Milestone mode rendering ---
-  const initSubtasks = subtasks.filter((s) => s["Parent Milestone"] === record?.id);
+  const initSubtasks = subtasks.filter((s) => s["Parent Milestone"] === record?.Name);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -306,12 +311,15 @@ export default function EditModal({
             </div>
             <div className="form-group">
               <label>DRI</label>
-              <input
-                type="text"
+              <select
                 value={form.DRI}
                 onChange={(e) => handleChange("DRI", e.target.value)}
-                placeholder="Directly Responsible Individual"
-              />
+              >
+                <option value="">— Select DRI —</option>
+                {teamMembers.map((m) => (
+                  <option key={m.id} value={m.name}>{m.name}</option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label>Days Needed</label>
@@ -414,12 +422,14 @@ export default function EditModal({
                       </select>
                     </div>
                     <div className="form-group">
-                      <input
-                        type="text"
-                        placeholder="DRI"
+                      <select
                         value={editingSubtask.DRI}
-                        onChange={(e) => setEditingSubtask({ ...editingSubtask, DRI: e.target.value })}
-                      />
+                        onChange={(e) => setEditingSubtask({ ...editingSubtask, DRI: e.target.value })}>
+                        <option value="">— DRI —</option>
+                        {teamMembers.map((m) => (
+                          <option key={m.id} value={m.name}>{m.name}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="form-group">
                       <input

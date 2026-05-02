@@ -192,7 +192,7 @@ export default function InitiativeTable({
             const pending = pendingIds.has(item.id);
             const pastDue = isPastDue(item["Target Date"], item.Status);
             const expanded = expandedIds.has(item.id);
-            const itemSubtasks = subtaskMap[item.id] || [];
+            const itemSubtasks = subtaskMap[item.Name] || [];
             const initId = generateId(item.Workstream, idx);
             const isVictor = item.Workstream === "Video RAG";
 
@@ -240,7 +240,7 @@ export default function InitiativeTable({
                 {expanded && (
                   <SubtaskRows
                     subtasks={itemSubtasks}
-                    parentId={item.id}
+                    parentId={item.Name}
                     onAddSubtask={onAddSubtask}
                     onUpdateSubtask={onUpdateSubtask}
                     onDeleteSubtask={onDeleteSubtask}

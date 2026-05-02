@@ -9,6 +9,7 @@ import {
   createSubtask as apiCreateSubtask,
   updateSubtask as apiUpdateSubtask,
   deleteSubtask as apiDeleteSubtask,
+  fetchTeamMembers,
 } from "../api/airtable";
 
 const POLL_INTERVAL = 30_000; // 30 seconds
@@ -89,6 +90,7 @@ const SEED_DATA = [
 export function useAirtable() {
   const [initiatives, setInitiatives] = useState([]);
   const [subtasks, setSubtasks] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [lastSync, setLastSync] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,12 +99,14 @@ export function useAirtable() {
 
   const refresh = useCallback(async () => {
     try {
-      const [initData, subtaskData] = await Promise.all([
+      const [initData, subtaskData, teamData] = await Promise.all([
         fetchMilestones(),
-        fetchSubtasks().catch(() => []), // graceful fallback if Subtasks table doesn't exist yet
+        fetchSubtasks().catch(() => []),
+        fetchTeamMembers().catch(() => []),
       ]);
       setInitiatives(initData);
       setSubtasks(subtaskData);
+      setTeamMembers(teamData);
       setLastSync(new Date());
       setError(null);
     } catch (err) {
@@ -266,6 +270,7 @@ export function useAirtable() {
   return {
     initiatives,
     subtasks,
+    teamMembers,
     lastSync,
     loading,
     error,
