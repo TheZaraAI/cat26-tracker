@@ -14,7 +14,7 @@ function SetupScreen() {
   return (
     <div className="setup-screen">
       <div className="setup-card">
-        <h1>CAT26 Initiative Tracker</h1>
+        <h1>CAT26 Milestone Tracker</h1>
         <p>Configuration required. Set the following environment variables:</p>
         <pre>
 {`VITE_AIRTABLE_TOKEN=pat...
@@ -32,7 +32,7 @@ VITE_BASE_ID=app...`}
 }
 
 // ---------- Add Dropdown ----------
-function AddDropdown({ onAddInitiative, onAddSubtask }) {
+function AddDropdown({ onAddMilestone, onAddSubtask }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -53,9 +53,9 @@ function AddDropdown({ onAddInitiative, onAddSubtask }) {
         <div className="add-dropdown-menu">
           <button
             className="add-dropdown-item"
-            onClick={() => { setOpen(false); onAddInitiative(); }}
+            onClick={() => { setOpen(false); onAddMilestone(); }}
           >
-            Add Initiative
+            Add Milestone
           </button>
           <button
             className="add-dropdown-item"
@@ -138,7 +138,7 @@ export default function App() {
       {/* Header */}
       <header className="header">
         <div className="header-left">
-          <h1>CAT26 Initiative Tracker</h1>
+          <h1>CAT26 Milestone Tracker</h1>
           <span className="header-subtitle">75th IC Det 5/6 | May 3-16, 2026 | Austin TX</span>
         </div>
         <div className="header-right">
@@ -152,7 +152,7 @@ export default function App() {
             Export Excel
           </button>
           <AddDropdown
-            onAddInitiative={() => setShowAdd(true)}
+            onAddMilestone={() => setShowAdd(true)}
             onAddSubtask={() => setShowAddSubtask(true)}
           />
         </div>
@@ -174,7 +174,7 @@ export default function App() {
       {/* Empty state */}
       {!loading && initiatives.length === 0 && (
         <div className="empty-state">
-          <p>No initiatives found.</p>
+          <p>No milestones found.</p>
           <button className="btn btn-primary" onClick={seed}>
             Seed default data
           </button>
@@ -224,7 +224,7 @@ export default function App() {
         />
       )}
 
-      {/* Add initiative modal */}
+      {/* Add milestone modal */}
       {showAdd && (
         <EditModal
           record={null}
@@ -244,7 +244,7 @@ export default function App() {
           onClose={() => setShowAddSubtask(false)}
           isNew={true}
           mode="subtask"
-          initiatives={initiatives}
+          milestones={initiatives}
           onAddSubtask={addSubtask}
         />
       )}

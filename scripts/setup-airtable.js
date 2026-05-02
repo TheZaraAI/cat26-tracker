@@ -3,8 +3,8 @@
  * CAT26 Airtable Setup Script
  *
  * Works with the EXISTING Airtable base (appbH0ung2ZJqkZOf).
- * Seeds initiative records into the "Initiatives" table and creates
- * the "Subtasks" table if it does not already exist.
+ * Seeds milestone records into the "Milestones" table and verifies
+ * the Subtasks table (synced from GitLab Issues) exists.
  *
  * Usage:
  *   AIRTABLE_TOKEN=pat... node scripts/setup-airtable.js
@@ -77,38 +77,37 @@ async function airtableFetch(path, options = {}) {
 async function verifyBase() {
   console.log(`Verifying access to base ${BASE_ID}...`);
   const body = await airtableFetch(`/meta/bases/${BASE_ID}/tables`);
-  const table = body.tables.find((t) => t.name === "Initiatives");
+  const table = body.tables.find((t) => t.name === "Milestones");
   if (!table) {
-    throw new Error('Table "Initiatives" not found in base. Available tables: ' +
+    throw new Error('Table "Milestones" not found in base. Available tables: ' +
       body.tables.map((t) => t.name).join(", "));
   }
   console.log(`  Found table "${table.name}" (${table.id})`);
   console.log(`  Fields: ${table.fields.map((f) => f.name).join(", ")}`);
 
-  const subtasksTable = body.tables.find((t) => t.name === "Subtasks");
-  return { initiativesTable: table, subtasksTable, allTables: body.tables };
+  const subtasksTable = body.tables.find((t) => t.id === "tblx1T6GElbJVPO81");
+  return { milestonesTable: table, subtasksTable, allTables: body.tables };
 }
 
 // ---------------------------------------------------------------------------
 // 2. Create Subtasks Table
 // ---------------------------------------------------------------------------
 async function createSubtasksTable() {
-  console.log('\nCreating "Subtasks" table...');
+  console.log('\nCreating "Subtasks" table (GitLab Issues)...');
   const body = await airtableFetch(`/meta/bases/${BASE_ID}/tables`, {
     method: "POST",
     body: JSON.stringify({
       name: "Subtasks",
-      description: "Subtasks for CAT26 initiatives",
+      description: "Subtasks synced from GitLab Issues for CAT26 milestones",
       fields: [
         {
-          name: "Name",
+          name: "Title",
           type: "singleLineText",
-          description: "Subtask name",
+          description: "Issue title (primary field)",
         },
         {
-          name: "Parent Initiative",
-          type: "singleLineText",
-          description: "Record ID of the parent initiative",
+          name: "Description",
+          type: "multilineText",
         },
         {
           name: "Status",
@@ -118,9 +117,53 @@ async function createSubtasksTable() {
               { name: "Not Started", color: "yellowLight2" },
               { name: "In Progress", color: "blueLight2" },
               { name: "On Hold", color: "redLight2" },
-              { name: "Completed", color: "greenLight2" },
+              { name: "Closed", color: "greenLight2" },
             ],
           },
+        },
+        {
+          name: "Labels",
+          type: "singleLineText",
+        },
+        {
+          name: "Assignees",
+          type: "singleLineText",
+        },
+        {
+          name: "GitLab Issue ID",
+          type: "number",
+          options: { precision: 0 },
+        },
+        {
+          name: "GitLab URL",
+          type: "url",
+        },
+        {
+          name: "GitLab Project",
+          type: "singleLineText",
+        },
+        {
+          name: "Due Date",
+          type: "date",
+          options: { dateFormat: { name: "iso" } },
+        },
+        {
+          name: "Milestone",
+          type: "singleLineText",
+          description: "Parent milestone name",
+        },
+        {
+          name: "Last Synced",
+          type: "dateTime",
+          options: { timeZone: "utc", dateFormat: { name: "iso" }, timeFormat: { name: "24hour" } },
+        },
+        {
+          name: "Priority",
+          type: "singleLineText",
+        },
+        {
+          name: "Workstream",
+          type: "singleLineText",
         },
         {
           name: "DRI",
@@ -128,15 +171,18 @@ async function createSubtasksTable() {
           description: "Directly Responsible Individual",
         },
         {
-          name: "Notes",
-          type: "multilineText",
+          name: "Start Date",
+          type: "date",
+          options: { dateFormat: { name: "iso" } },
         },
         {
-          name: "Due Date",
+          name: "Target Date",
           type: "date",
-          options: {
-            dateFormat: { name: "iso" },
-          },
+          options: { dateFormat: { name: "iso" } },
+        },
+        {
+          name: "Notes",
+          type: "multilineText",
         },
       ],
     }),
@@ -224,9 +270,9 @@ const SEED_RECORDS = [
 ];
 
 async function seedData() {
-  console.log("Seeding 10 initiative records...");
+  console.log("Seeding 10 milestone records...");
   const records = SEED_RECORDS.map((fields) => ({ fields }));
-  const body = await airtableFetch(`/${BASE_ID}/Initiatives`, {
+  const body = await airtableFetch(`/${BASE_ID}/Milestones`, {
     method: "POST",
     body: JSON.stringify({ records }),
   });
@@ -241,7 +287,7 @@ async function main() {
   console.log("=== CAT26 Airtable Setup ===\n");
   console.log(`Using existing base: ${BASE_ID}\n`);
 
-  const { subtasksTable } = await verifyBase();
+  const { milestonesTable, subtasksTable } = await verifyBase();
 
   // Create Subtasks table if it doesn't exist
   if (subtasksTable) {

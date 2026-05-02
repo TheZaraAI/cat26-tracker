@@ -42,7 +42,7 @@ function SubtaskRows({
     if (!newName.trim()) return;
     await onAddSubtask({
       Name: newName.trim(),
-      "Parent Initiative": parentId,
+      "Parent Milestone": parentId,
       Status: "Not Started",
     });
     setNewName("");
@@ -152,7 +152,7 @@ export default function InitiativeTable({
   // Build subtask map: parentId -> subtask[]
   const subtaskMap = {};
   for (const st of subtasks) {
-    const parentId = st["Parent Initiative"];
+    const parentId = st["Parent Milestone"];
     if (parentId) {
       if (!subtaskMap[parentId]) subtaskMap[parentId] = [];
       subtaskMap[parentId].push(st);

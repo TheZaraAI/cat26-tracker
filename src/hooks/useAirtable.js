@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
-  fetchInitiatives,
-  updateInitiative,
-  createInitiative,
-  deleteInitiative,
+  fetchMilestones,
+  updateMilestone,
+  createMilestone,
+  deleteMilestone,
   seedRecords,
   fetchSubtasks,
   createSubtask as apiCreateSubtask,
@@ -98,7 +98,7 @@ export function useAirtable() {
   const refresh = useCallback(async () => {
     try {
       const [initData, subtaskData] = await Promise.all([
-        fetchInitiatives(),
+        fetchMilestones(),
         fetchSubtasks().catch(() => []), // graceful fallback if Subtasks table doesn't exist yet
       ]);
       setInitiatives(initData);
@@ -131,7 +131,7 @@ export function useAirtable() {
     );
 
     try {
-      const updated = await updateInitiative(recordId, { Status: newStatus });
+      const updated = await updateMilestone(recordId, { Status: newStatus });
       setInitiatives((prev) =>
         prev.map((i) => (i.id === recordId ? updated : i))
       );
@@ -154,7 +154,7 @@ export function useAirtable() {
   const updateRecord = useCallback(async (recordId, fields) => {
     setPendingIds((prev) => new Set(prev).add(recordId));
     try {
-      const updated = await updateInitiative(recordId, fields);
+      const updated = await updateMilestone(recordId, fields);
       setInitiatives((prev) =>
         prev.map((i) => (i.id === recordId ? updated : i))
       );
@@ -177,7 +177,7 @@ export function useAirtable() {
   // Create new record
   const addRecord = useCallback(async (fields) => {
     try {
-      const created = await createInitiative(fields);
+      const created = await createMilestone(fields);
       setInitiatives((prev) => [...prev, created]);
       setLastSync(new Date());
       setError(null);
@@ -192,7 +192,7 @@ export function useAirtable() {
   const removeRecord = useCallback(async (recordId) => {
     setPendingIds((prev) => new Set(prev).add(recordId));
     try {
-      await deleteInitiative(recordId);
+      await deleteMilestone(recordId);
       setInitiatives((prev) => prev.filter((i) => i.id !== recordId));
       setLastSync(new Date());
       setError(null);

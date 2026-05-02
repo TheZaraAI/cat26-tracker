@@ -33,8 +33,8 @@ export default function EditModal({
   onClose,
   isNew,
   // Subtask mode props
-  mode = "initiative", // "initiative" | "subtask"
-  initiatives = [],
+  mode = "milestone", // "milestone" | "subtask"
+  milestones = [],
   // Subtask management within initiative edit
   subtasks = [],
   onAddSubtask,
@@ -42,7 +42,7 @@ export default function EditModal({
   onDeleteSubtask,
 }) {
   const [form, setForm] = useState(EMPTY);
-  const [subtaskForm, setSubtaskForm] = useState({ ...EMPTY_SUBTASK, "Parent Initiative": "" });
+  const [subtaskForm, setSubtaskForm] = useState({ ...EMPTY_SUBTASK, "Parent Milestone": "" });
   const [saving, setSaving] = useState(false);
   const [showSubtaskAdd, setShowSubtaskAdd] = useState(false);
   const [editingSubtask, setEditingSubtask] = useState(null);
@@ -55,7 +55,7 @@ export default function EditModal({
         DRI: "",
         "Due Date": "",
         Notes: "",
-        "Parent Initiative": initiatives.length > 0 ? initiatives[0].id : "",
+        "Parent Milestone": milestones.length > 0 ? milestones[0].id : "",
       });
       return;
     }
@@ -74,7 +74,7 @@ export default function EditModal({
     } else {
       setForm(EMPTY);
     }
-  }, [record, mode, initiatives]);
+  }, [record, mode, milestones]);
 
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -84,7 +84,7 @@ export default function EditModal({
     setSubtaskForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  // Submit initiative
+  // Submit milestone
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.Name.trim()) return;
@@ -108,7 +108,7 @@ export default function EditModal({
   // Submit subtask (when mode === "subtask")
   async function handleSubtaskSubmit(e) {
     e.preventDefault();
-    if (!subtaskForm.Name.trim() || !subtaskForm["Parent Initiative"]) return;
+    if (!subtaskForm.Name.trim() || !subtaskForm["Parent Milestone"]) return;
 
     setSaving(true);
     try {
@@ -126,7 +126,7 @@ export default function EditModal({
   }
 
   async function handleDelete() {
-    if (!confirm("Delete this initiative?")) return;
+    if (!confirm("Delete this milestone?")) return;
     setSaving(true);
     try {
       await onDelete(record.id);
@@ -138,13 +138,13 @@ export default function EditModal({
     }
   }
 
-  // Inline subtask add within initiative edit
+  // Inline subtask add within milestone edit
   async function handleInlineSubtaskAdd() {
     if (!editingSubtask || !editingSubtask.Name.trim()) return;
     try {
       const fields = {
         Name: editingSubtask.Name,
-        "Parent Initiative": record.id,
+        "Parent Milestone": record.id,
         Status: editingSubtask.Status || "Not Started",
         DRI: editingSubtask.DRI || "",
       };
@@ -169,15 +169,15 @@ export default function EditModal({
           </div>
           <form onSubmit={handleSubtaskSubmit}>
             <div className="form-group">
-              <label>Parent Initiative *</label>
+              <label>Parent Milestone *</label>
               <select
-                value={subtaskForm["Parent Initiative"]}
-                onChange={(e) => handleSubtaskFormChange("Parent Initiative", e.target.value)}
+                value={subtaskForm["Parent Milestone"]}
+                onChange={(e) => handleSubtaskFormChange("Parent Milestone", e.target.value)}
                 required
               >
-                <option value="">Select initiative...</option>
-                {initiatives.map((init) => (
-                  <option key={init.id} value={init.id}>{init.Name}</option>
+                <option value="">Select milestone...</option>
+                {milestones.map((ms) => (
+                  <option key={ms.id} value={ms.id}>{ms.Name}</option>
                 ))}
               </select>
             </div>
@@ -243,14 +243,14 @@ export default function EditModal({
     );
   }
 
-  // --- Initiative mode rendering ---
-  const initSubtasks = subtasks.filter((s) => s["Parent Initiative"] === record?.id);
+  // --- Milestone mode rendering ---
+  const initSubtasks = subtasks.filter((s) => s["Parent Milestone"] === record?.id);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{isNew ? "Add Initiative" : "Edit Initiative"}</h2>
+          <h2>{isNew ? "Add Milestone" : "Edit Milestone"}</h2>
           <button className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <form onSubmit={handleSubmit}>
@@ -343,7 +343,7 @@ export default function EditModal({
             />
           </div>
 
-          {/* Subtasks section (only when editing existing initiative) */}
+          {/* Subtasks section (only when editing existing milestone) */}
           {!isNew && record && (
             <div className="modal-subtasks">
               <div className="modal-subtasks-header">

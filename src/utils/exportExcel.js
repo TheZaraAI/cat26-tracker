@@ -38,7 +38,7 @@ function buildSummaryData(records) {
   const videoRag = records.filter((r) => r.Workstream === "Video RAG");
 
   return [
-    { Metric: "Total Initiatives", Value: total },
+    { Metric: "Total Milestones", Value: total },
     { Metric: "Closed", Value: completed },
     { Metric: "In Progress", Value: inProgress },
     { Metric: "Blocked", Value: blocked },
@@ -47,9 +47,9 @@ function buildSummaryData(records) {
     { Metric: "Completion %", Value: total ? `${Math.round((completed / total) * 100)}%` : "0%" },
     { Metric: "Days to Eval", Value: daysToEval() },
     { Metric: "", Value: "" },
-    { Metric: "TA50 Initiatives", Value: ta50.length },
+    { Metric: "TA50 Milestones", Value: ta50.length },
     { Metric: "TA50 Completed", Value: ta50.filter((r) => r.Status === "Closed").length },
-    { Metric: "Video RAG Initiatives", Value: videoRag.length },
+    { Metric: "Video RAG Milestones", Value: videoRag.length },
     { Metric: "Video RAG Completed", Value: videoRag.filter((r) => r.Status === "Closed").length },
     { Metric: "", Value: "" },
     { Metric: "Exported", Value: new Date().toISOString() },

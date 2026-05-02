@@ -9,8 +9,8 @@
 
 const TOKEN = import.meta.env.VITE_AIRTABLE_TOKEN;
 const BASE_ID = import.meta.env.VITE_BASE_ID;
-const TABLE_NAME = "Initiatives";
-const SUBTASKS_TABLE = "Subtasks";
+const TABLE_NAME = "Milestones";
+const SUBTASKS_TABLE = "tblx1T6GElbJVPO81";
 const API_ROOT = "https://api.airtable.com/v0";
 
 // --- Priority mapping: Airtable <-> UI ---
@@ -96,9 +96,9 @@ function url(path = "", table = TABLE_NAME) {
 }
 
 /**
- * Fetch all initiative records (handles pagination).
+ * Fetch all milestone records (handles pagination).
  */
-export async function fetchInitiatives() {
+export async function fetchMilestones() {
   let allRecords = [];
   let offset = undefined;
 
@@ -125,7 +125,7 @@ export async function fetchInitiatives() {
 /**
  * Update a single record field(s) with PATCH.
  */
-export async function updateInitiative(recordId, fields) {
+export async function updateMilestone(recordId, fields) {
   const res = await fetch(url("", TABLE_NAME), {
     method: "PATCH",
     headers: headers(),
@@ -145,9 +145,9 @@ export async function updateInitiative(recordId, fields) {
 }
 
 /**
- * Create a new initiative record.
+ * Create a new milestone record.
  */
-export async function createInitiative(fields) {
+export async function createMilestone(fields) {
   const res = await fetch(url("", TABLE_NAME), {
     method: "POST",
     headers: headers(),
@@ -169,7 +169,7 @@ export async function createInitiative(fields) {
 /**
  * Delete a record by ID.
  */
-export async function deleteInitiative(recordId) {
+export async function deleteMilestone(recordId) {
   const params = new URLSearchParams();
   params.set("records[]", recordId);
 
@@ -208,8 +208,44 @@ export async function seedRecords(records) {
 }
 
 // =====================================================================
-// Subtask CRUD
+// Subtask CRUD (GitLab Issues synced to Airtable)
 // =====================================================================
+
+/**
+ * Convert a subtask record from Airtable to app-internal shape.
+ * Airtable uses "Title" as the primary field; the app uses "Name".
+ * Airtable uses "Milestone" to link to the parent milestone name;
+ * the app uses "Parent Milestone" internally.
+ */
+function subtaskFromAirtable(fields) {
+  const mapped = { ...fields };
+  if ("Title" in mapped) {
+    mapped.Name = mapped.Title;
+    delete mapped.Title;
+  }
+  if ("Milestone" in mapped) {
+    mapped["Parent Milestone"] = mapped.Milestone;
+    delete mapped.Milestone;
+  }
+  return mapped;
+}
+
+/**
+ * Convert app-internal subtask fields to Airtable field names for writes.
+ * "Name" -> "Title", "Parent Milestone" -> "Milestone".
+ */
+function subtaskToAirtable(fields) {
+  const mapped = { ...fields };
+  if ("Name" in mapped) {
+    mapped.Title = mapped.Name;
+    delete mapped.Name;
+  }
+  if ("Parent Milestone" in mapped) {
+    mapped.Milestone = mapped["Parent Milestone"];
+    delete mapped["Parent Milestone"];
+  }
+  return mapped;
+}
 
 /**
  * Fetch all subtask records (handles pagination).
@@ -230,7 +266,7 @@ export async function fetchSubtasks() {
 
     const data = await res.json();
     allRecords = allRecords.concat(
-      data.records.map((r) => ({ id: r.id, ...r.fields }))
+      data.records.map((r) => ({ id: r.id, ...subtaskFromAirtable(r.fields) }))
     );
     offset = data.offset;
   } while (offset);
@@ -246,7 +282,7 @@ export async function createSubtask(fields) {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({
-      records: [{ fields }],
+      records: [{ fields: subtaskToAirtable(fields) }],
     }),
   });
 
@@ -257,7 +293,7 @@ export async function createSubtask(fields) {
 
   const data = await res.json();
   const r = data.records[0];
-  return { id: r.id, ...r.fields };
+  return { id: r.id, ...subtaskFromAirtable(r.fields) };
 }
 
 /**
@@ -268,7 +304,7 @@ export async function updateSubtask(recordId, fields) {
     method: "PATCH",
     headers: headers(),
     body: JSON.stringify({
-      records: [{ id: recordId, fields }],
+      records: [{ id: recordId, fields: subtaskToAirtable(fields) }],
     }),
   });
 
@@ -279,7 +315,7 @@ export async function updateSubtask(recordId, fields) {
 
   const data = await res.json();
   const r = data.records[0];
-  return { id: r.id, ...r.fields };
+  return { id: r.id, ...subtaskFromAirtable(r.fields) };
 }
 
 /**
