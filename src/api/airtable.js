@@ -62,6 +62,15 @@ function fromAirtable(fields) {
  * Convert app-internal fields to Airtable field names/values for writes.
  * "Name" -> "Project Name", priority/status translated.
  */
+// Fields that are linked records or read-only — strip before writing
+const MILESTONE_STRIP_FIELDS = [
+  "Project Lead", "Documentation", "Comments", "Subtasks",
+  "Milestones", "Tasks", "Start Date", "End Date",
+  "Description", "Technical Requirements", "Scope",
+  "Progress (%)", "GitLab Milestone ID", "GitLab Project",
+  "id",
+];
+
 function toAirtable(fields) {
   const mapped = { ...fields };
   // Rename primary field
@@ -76,6 +85,10 @@ function toAirtable(fields) {
   // Translate status
   if (mapped.Status) {
     mapped.Status = STATUS_UI_TO_AT[mapped.Status] || mapped.Status;
+  }
+  // Strip linked record and read-only fields
+  for (const f of MILESTONE_STRIP_FIELDS) {
+    delete mapped[f];
   }
   return mapped;
 }
@@ -234,22 +247,33 @@ export async function seedRecords(records) {
  * Airtable uses "Milestone" to link to the parent milestone name;
  * the app uses "Parent Milestone" internally.
  */
+// Fields to strip from subtask writes (linked records, read-only)
+const SUBTASK_STRIP_FIELDS = [
+  "Milestone", "Assigned To", "Labels (unused)", "id",
+  "Last Synced", "GitLab Issue ID", "GitLab URL", "GitLab Project",
+];
+
 function subtaskFromAirtable(fields) {
   const mapped = { ...fields };
   if ("Title" in mapped) {
     mapped.Name = mapped.Title;
     delete mapped.Title;
   }
-  if ("Milestone" in mapped) {
-    mapped["Parent Milestone"] = mapped.Milestone;
-    delete mapped.Milestone;
+  // "Milestone Title" is the text field that stores the parent milestone name
+  if ("Milestone Title" in mapped) {
+    mapped["Parent Milestone"] = mapped["Milestone Title"];
+    delete mapped["Milestone Title"];
   }
+  // "Milestone" is a linked record field — ignore it for our purposes
+  delete mapped.Milestone;
+  delete mapped["Assigned To"];
   return mapped;
 }
 
 /**
  * Convert app-internal subtask fields to Airtable field names for writes.
- * "Name" -> "Title", "Parent Milestone" -> "Milestone".
+ * "Name" -> "Title", "Parent Milestone" -> "Milestone Title" (text field).
+ * Never write to "Milestone" (linked record field).
  */
 function subtaskToAirtable(fields) {
   const mapped = { ...fields };
@@ -258,8 +282,12 @@ function subtaskToAirtable(fields) {
     delete mapped.Name;
   }
   if ("Parent Milestone" in mapped) {
-    mapped.Milestone = mapped["Parent Milestone"];
+    mapped["Milestone Title"] = mapped["Parent Milestone"];
     delete mapped["Parent Milestone"];
+  }
+  // Strip linked record and read-only fields
+  for (const f of SUBTASK_STRIP_FIELDS) {
+    delete mapped[f];
   }
   return mapped;
 }
