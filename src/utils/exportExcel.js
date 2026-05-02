@@ -28,7 +28,7 @@ function toRows(records) {
 
 function buildSummaryData(records) {
   const total = records.length;
-  const completed = records.filter((r) => r.Status === "Completed").length;
+  const completed = records.filter((r) => r.Status === "Closed").length;
   const inProgress = records.filter((r) => r.Status === "In progress").length;
   const blocked = records.filter((r) => r.Status === "Blocked" || r.Status === "On Hold").length;
   const notStarted = records.filter((r) => r.Status === "Not started" || r.Status === "Not Started").length;
@@ -39,7 +39,7 @@ function buildSummaryData(records) {
 
   return [
     { Metric: "Total Initiatives", Value: total },
-    { Metric: "Completed", Value: completed },
+    { Metric: "Closed", Value: completed },
     { Metric: "In Progress", Value: inProgress },
     { Metric: "Blocked", Value: blocked },
     { Metric: "Not Started", Value: notStarted },
@@ -48,9 +48,9 @@ function buildSummaryData(records) {
     { Metric: "Days to Eval", Value: daysToEval() },
     { Metric: "", Value: "" },
     { Metric: "TA50 Initiatives", Value: ta50.length },
-    { Metric: "TA50 Completed", Value: ta50.filter((r) => r.Status === "Completed").length },
+    { Metric: "TA50 Completed", Value: ta50.filter((r) => r.Status === "Closed").length },
     { Metric: "Video RAG Initiatives", Value: videoRag.length },
-    { Metric: "Video RAG Completed", Value: videoRag.filter((r) => r.Status === "Completed").length },
+    { Metric: "Video RAG Completed", Value: videoRag.filter((r) => r.Status === "Closed").length },
     { Metric: "", Value: "" },
     { Metric: "Exported", Value: new Date().toISOString() },
     { Metric: "Event", Value: "CAT26 Code-a-thon, 75th IC Det 5/6" },

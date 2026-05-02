@@ -1,5 +1,5 @@
 const PRIORITIES = ["P1", "P2", "P3"];
-const STATUSES = ["Not started", "In progress", "Blocked", "Completed", "Planning"];
+const STATUSES = ["Not started", "In progress", "Blocked", "Closed", "Planning"];
 
 export default function FilterBar({ filters, onChange }) {
   function toggle(type, value) {

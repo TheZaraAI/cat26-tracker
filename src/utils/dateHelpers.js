@@ -37,7 +37,7 @@ export function formatTime(date) {
  * Check if a target date is past due.
  */
 export function isPastDue(dateStr, status) {
-  if (!dateStr || status === "Completed") return false;
+  if (!dateStr || status === "Closed") return false;
   const target = new Date(dateStr + "T23:59:59");
   return new Date() > target;
 }

@@ -3,7 +3,7 @@ import { daysToEval } from "../utils/dateHelpers";
 
 export default function ExecDashboard({ initiatives }) {
   const total = initiatives.length;
-  const completed = initiatives.filter((i) => i.Status === "Completed").length;
+  const completed = initiatives.filter((i) => i.Status === "Closed").length;
   const inProgress = initiatives.filter((i) => i.Status === "In progress").length;
   const blocked = initiatives.filter((i) => i.Status === "Blocked").length;
   const days = daysToEval();
@@ -17,7 +17,7 @@ export default function ExecDashboard({ initiatives }) {
         color="#9CA3AF"
       />
       <StatCard
-        label="Completed"
+        label="Closed"
         value={completed}
         total={total}
         icon={"\u2713"}

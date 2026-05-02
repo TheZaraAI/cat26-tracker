@@ -29,7 +29,7 @@ const STATUS_AT_TO_UI = {
   "Not Started": "Not started",
   "In Progress": "In progress",
   "On Hold": "Blocked",
-  Completed: "Completed",
+  Completed: "Closed",
   Planning: "Planning",
 };
 const STATUS_UI_TO_AT = Object.fromEntries(

@@ -3,8 +3,8 @@ import { shortDate } from "../utils/dateHelpers";
 
 const WORKSTREAMS = ["TA50", "Video RAG"];
 const PRIORITIES = ["P1", "P2", "P3"];
-const STATUSES = ["Not started", "In progress", "Blocked", "Completed", "Planning"];
-const SUBTASK_STATUSES = ["Not Started", "In Progress", "On Hold", "Completed"];
+const STATUSES = ["Not started", "In progress", "Blocked", "Closed", "Planning"];
+const SUBTASK_STATUSES = ["Not Started", "In Progress", "On Hold", "Closed"];
 
 const EMPTY = {
   Name: "",
@@ -365,7 +365,7 @@ export default function EditModal({
                   {initSubtasks.map((st) => (
                     <div key={st.id} className="modal-subtask-item">
                       <div className="modal-subtask-info">
-                        <span className={`modal-subtask-status-dot ${st.Status === "Completed" ? "dot-completed" : st.Status === "In Progress" ? "dot-progress" : st.Status === "On Hold" ? "dot-hold" : "dot-default"}`} />
+                        <span className={`modal-subtask-status-dot ${st.Status === "Closed" ? "dot-completed" : st.Status === "In Progress" ? "dot-progress" : st.Status === "On Hold" ? "dot-hold" : "dot-default"}`} />
                         <span className="modal-subtask-name">{st.Name}</span>
                       </div>
                       <div className="modal-subtask-meta">

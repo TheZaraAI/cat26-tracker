@@ -2,8 +2,8 @@ import { useState, Fragment } from "react";
 import { PriorityBadge } from "./Badge";
 import { shortDate, isPastDue } from "../utils/dateHelpers";
 
-const STATUS_OPTIONS = ["Not started", "In progress", "Blocked", "Completed", "Planning"];
-const SUBTASK_STATUS_OPTIONS = ["Not Started", "In Progress", "On Hold", "Completed"];
+const STATUS_OPTIONS = ["Not started", "In progress", "Blocked", "Closed", "Planning"];
+const SUBTASK_STATUS_OPTIONS = ["Not Started", "In Progress", "On Hold", "Closed"];
 
 /**
  * Generate initiative IDs based on workstream.
@@ -19,7 +19,7 @@ function generateId(workstream, index) {
 
 function SubtaskBadge({ subtasks }) {
   if (!subtasks || subtasks.length === 0) return null;
-  const completed = subtasks.filter((s) => s.Status === "Completed").length;
+  const completed = subtasks.filter((s) => s.Status === "Closed").length;
   return (
     <span className="subtask-count-badge">
       {completed}/{subtasks.length}
@@ -137,7 +137,7 @@ export default function InitiativeTable({
 
   if (initiatives.length === 0) return null;
 
-  const completed = initiatives.filter((i) => i.Status === "Completed").length;
+  const completed = initiatives.filter((i) => i.Status === "Closed").length;
   const pct = Math.round((completed / initiatives.length) * 100);
 
   function toggleExpand(id) {
