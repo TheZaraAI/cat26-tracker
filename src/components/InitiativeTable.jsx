@@ -3,7 +3,7 @@ import { PriorityBadge } from "./Badge";
 import { shortDate, isPastDue } from "../utils/dateHelpers";
 
 const STATUS_OPTIONS = ["Not started", "In progress", "Blocked", "Closed", "Planning"];
-const SUBTASK_STATUS_OPTIONS = ["Not Started", "In Progress", "On Hold", "Closed"];
+const SUBTASK_STATUS_OPTIONS = ["Not Started", "In Progress", "Closed"];
 
 /**
  * Generate initiative IDs based on workstream.

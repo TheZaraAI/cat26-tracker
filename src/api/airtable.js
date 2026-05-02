@@ -253,11 +253,29 @@ const SUBTASK_STRIP_FIELDS = [
   "Last Synced", "GitLab Issue ID", "GitLab URL", "GitLab Project",
 ];
 
+// Subtask status mapping: App UI <-> Airtable
+// Airtable has: Open, In Progress, Closed
+const SUBTASK_STATUS_AT_TO_UI = {
+  "Open": "Not Started",
+  "In Progress": "In Progress",
+  "Closed": "Closed",
+};
+const SUBTASK_STATUS_UI_TO_AT = {
+  "Not Started": "Open",
+  "In Progress": "In Progress",
+  "On Hold": "Open",
+  "Closed": "Closed",
+};
+
 function subtaskFromAirtable(fields) {
   const mapped = { ...fields };
   if ("Title" in mapped) {
     mapped.Name = mapped.Title;
     delete mapped.Title;
+  }
+  // Map status
+  if (mapped.Status) {
+    mapped.Status = SUBTASK_STATUS_AT_TO_UI[mapped.Status] || mapped.Status;
   }
   // "Milestone Title" is the text field that stores the parent milestone name
   if ("Milestone Title" in mapped) {
@@ -273,13 +291,17 @@ function subtaskFromAirtable(fields) {
 /**
  * Convert app-internal subtask fields to Airtable field names for writes.
  * "Name" -> "Title", "Parent Milestone" -> "Milestone Title" (text field).
- * Never write to "Milestone" (linked record field).
+ * Status mapped to Airtable values (Open/In Progress/Closed).
  */
 function subtaskToAirtable(fields) {
   const mapped = { ...fields };
   if ("Name" in mapped) {
     mapped.Title = mapped.Name;
     delete mapped.Name;
+  }
+  // Map status to Airtable values
+  if (mapped.Status) {
+    mapped.Status = SUBTASK_STATUS_UI_TO_AT[mapped.Status] || mapped.Status;
   }
   if ("Parent Milestone" in mapped) {
     mapped["Milestone Title"] = mapped["Parent Milestone"];
