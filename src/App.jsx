@@ -184,7 +184,7 @@ export default function App() {
       {/* Tables */}
       {(activeTab === "All" || activeTab === "TA50") && (
         <InitiativeTable
-          title="TA50 \u2014 Sentinel Inventory"
+          title="TA50"
           initiatives={ta50}
           pendingIds={pendingIds}
           onStatusChange={updateStatus}
@@ -197,7 +197,7 @@ export default function App() {
       )}
       {(activeTab === "All" || activeTab === "Video RAG") && (
         <InitiativeTable
-          title="Video RAG \u2014 Multimodal Intelligence"
+          title="Video RAG"
           initiatives={videoRag}
           pendingIds={pendingIds}
           onStatusChange={updateStatus}

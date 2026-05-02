@@ -7,13 +7,13 @@ const SUBTASK_STATUS_OPTIONS = ["Not Started", "In Progress", "On Hold", "Closed
 
 /**
  * Generate initiative IDs based on workstream.
- * Video RAG -> VICTOR-01, VICTOR-02, ...
- * TA50 -> TANGO ALPHA-01, TANGO ALPHA-02, ...
+ * Video RAG -> VR-01, VR-02, ...
+ * TA50 -> TA-01, TA-02, ...
  */
 function generateId(workstream, index) {
   const num = String(index + 1).padStart(2, "0");
-  if (workstream === "Video RAG") return `VICTOR-${num}`;
-  if (workstream === "TA50") return `TANGO ALPHA-${num}`;
+  if (workstream === "Video RAG") return `VR-${num}`;
+  if (workstream === "TA50") return `TA-${num}`;
   return `${workstream}-${num}`;
 }
 
