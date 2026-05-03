@@ -33,13 +33,14 @@ function SubtaskRows({
   onDeleteSubtask,
   onAddSubtask,
   parentId,
+  editMode = false,
 }) {
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
 
   async function handleQuickAdd(e) {
     e.preventDefault();
-    if (!newName.trim()) return;
+    if (!newName.trim() || !onAddSubtask) return;
     await onAddSubtask({
       Name: newName.trim(),
       "Parent Milestone": parentId,
@@ -62,62 +63,72 @@ function SubtaskRows({
             {st.Name}
           </td>
           <td onClick={(e) => e.stopPropagation()}>
-            <select
-              className="status-select status-select-sm"
-              value={st.Status || "Not Started"}
-              onChange={(e) => onUpdateSubtask(st.id, { Status: e.target.value })}
-            >
-              {SUBTASK_STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+            {editMode && onUpdateSubtask ? (
+              <select
+                className="status-select status-select-sm"
+                value={st.Status || "Not Started"}
+                onChange={(e) => onUpdateSubtask(st.id, { Status: e.target.value })}
+              >
+                {SUBTASK_STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            ) : (
+              <span className={`status-label status-${(st.Status || "not-started").toLowerCase().replace(/\s+/g, "-")}`}>
+                {st.Status || "Not Started"}
+              </span>
+            )}
           </td>
           <td>{st["Due Date"] ? shortDate(st["Due Date"]) : "\u2014"}</td>
           <td>{st.DRI || "\u2014"}</td>
-          <td onClick={(e) => e.stopPropagation()}>
-            <button
-              className="subtask-delete-btn"
-              title="Delete subtask"
-              onClick={() => onDeleteSubtask(st.id)}
-            >
-              &times;
-            </button>
-          </td>
+          {editMode && (
+            <td onClick={(e) => e.stopPropagation()}>
+              <button
+                className="subtask-delete-btn"
+                title="Delete subtask"
+                onClick={() => onDeleteSubtask(st.id)}
+              >
+                &times;
+              </button>
+            </td>
+          )}
         </tr>
       ))}
-      <tr className="subtask-row subtask-add-row">
-        <td colSpan={7}>
-          <div className="subtask-add-inline">
-            {adding ? (
-              <form onSubmit={handleQuickAdd} className="subtask-quick-form">
-                <input
-                  type="text"
-                  className="subtask-quick-input"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Subtask name..."
-                  autoFocus
-                />
-                <button type="submit" className="btn btn-primary btn-xs">Add</button>
+      {editMode && (
+        <tr className="subtask-row subtask-add-row">
+          <td colSpan={7}>
+            <div className="subtask-add-inline">
+              {adding ? (
+                <form onSubmit={handleQuickAdd} className="subtask-quick-form">
+                  <input
+                    type="text"
+                    className="subtask-quick-input"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="Subtask name..."
+                    autoFocus
+                  />
+                  <button type="submit" className="btn btn-primary btn-xs">Add</button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-xs"
+                    onClick={() => { setAdding(false); setNewName(""); }}
+                  >
+                    Cancel
+                  </button>
+                </form>
+              ) : (
                 <button
-                  type="button"
-                  className="btn btn-secondary btn-xs"
-                  onClick={() => { setAdding(false); setNewName(""); }}
+                  className="subtask-add-btn"
+                  onClick={(e) => { e.stopPropagation(); setAdding(true); }}
                 >
-                  Cancel
+                  + Add subtask
                 </button>
-              </form>
-            ) : (
-              <button
-                className="subtask-add-btn"
-                onClick={(e) => { e.stopPropagation(); setAdding(true); }}
-              >
-                + Add subtask
-              </button>
-            )}
-          </div>
-        </td>
-      </tr>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
     </>
   );
 }
@@ -132,6 +143,7 @@ export default function InitiativeTable({
   onAddSubtask,
   onUpdateSubtask,
   onDeleteSubtask,
+  editMode = false,
 }) {
   const [expandedIds, setExpandedIds] = useState(new Set());
 
@@ -207,43 +219,50 @@ export default function InitiativeTable({
                   >
                     <span className={`expand-arrow ${expanded ? "expand-arrow-open" : ""}`}>&#9654;</span>
                   </td>
-                  <td className="cell-id" onClick={() => onEdit(item)}>
+                  <td className="cell-id" onClick={() => editMode && onEdit && onEdit(item)}>
                     <span className={`id-badge ${isVictor ? "id-badge-victor" : "id-badge-tango"}`}>
                       {initId}
                     </span>
                   </td>
-                  <td className="cell-name" onClick={() => onEdit(item)}>
+                  <td className="cell-name" onClick={() => editMode && onEdit && onEdit(item)}>
                     {item.Name}
                     {item["Stretch Goals"] && (
                       <span className="stretch-indicator" title={item["Stretch Goals"]}>+S</span>
                     )}
                     <SubtaskBadge subtasks={itemSubtasks} />
                   </td>
-                  <td onClick={() => onEdit(item)}><PriorityBadge value={item.Priority} /></td>
+                  <td onClick={() => editMode && onEdit && onEdit(item)}><PriorityBadge value={item.Priority} /></td>
                   <td onClick={(e) => e.stopPropagation()}>
-                    <select
-                      className="status-select"
-                      value={item.Status || "Not started"}
-                      onChange={(e) => onStatusChange(item.id, e.target.value)}
-                      disabled={pending}
-                    >
-                      {STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
+                    {editMode ? (
+                      <select
+                        className="status-select"
+                        value={item.Status || "Not started"}
+                        onChange={(e) => onStatusChange(item.id, e.target.value)}
+                        disabled={pending}
+                      >
+                        {STATUS_OPTIONS.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className={`status-label status-${(item.Status || "not-started").toLowerCase().replace(/\s+/g, "-")}`}>
+                        {item.Status || "Not started"}
+                      </span>
+                    )}
                   </td>
-                  <td className={pastDue ? "text-danger" : ""} onClick={() => onEdit(item)}>
+                  <td className={pastDue ? "text-danger" : ""}>
                     {shortDate(item["Target Date"])}
                   </td>
-                  <td onClick={() => onEdit(item)}>{item.DRI || "\u2014"}</td>
+                  <td>{item.DRI || "\u2014"}</td>
                 </tr>
                 {expanded && (
                   <SubtaskRows
                     subtasks={itemSubtasks}
                     parentId={item.Name}
-                    onAddSubtask={onAddSubtask}
-                    onUpdateSubtask={onUpdateSubtask}
-                    onDeleteSubtask={onDeleteSubtask}
+                    onAddSubtask={editMode ? onAddSubtask : undefined}
+                    onUpdateSubtask={editMode ? onUpdateSubtask : undefined}
+                    onDeleteSubtask={editMode ? onDeleteSubtask : undefined}
+                    editMode={editMode}
                   />
                 )}
               </Fragment>

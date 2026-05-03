@@ -94,6 +94,10 @@ export default function App() {
     teamMembers,
   } = useAirtable();
 
+  // Read mode from URL: ?mode=view or ?mode=edit (default: view)
+  const urlMode = new URLSearchParams(window.location.search).get("mode");
+  const [editMode, setEditMode] = useState(urlMode === "edit");
+
   const [activeTab, setActiveTab] = useState("All");
   const [filters, setFilters] = useState({ priority: new Set(), status: new Set() });
   const [editRecord, setEditRecord] = useState(null);
@@ -157,10 +161,24 @@ export default function App() {
           <button className="btn btn-accent" onClick={() => setShowSuccessMarkers(true)}>
             Success Markers
           </button>
-          <AddDropdown
-            onAddMilestone={() => setShowAdd(true)}
-            onAddSubtask={() => setShowAddSubtask(true)}
-          />
+          <button
+            className={`btn ${editMode ? "btn-mode-edit" : "btn-mode-view"}`}
+            onClick={() => {
+              const next = !editMode;
+              setEditMode(next);
+              const url = new URL(window.location);
+              url.searchParams.set("mode", next ? "edit" : "view");
+              window.history.replaceState({}, "", url);
+            }}
+          >
+            {editMode ? "Editing" : "View Only"}
+          </button>
+          {editMode && (
+            <AddDropdown
+              onAddMilestone={() => setShowAdd(true)}
+              onAddSubtask={() => setShowAddSubtask(true)}
+            />
+          )}
         </div>
       </header>
 
@@ -199,12 +217,13 @@ export default function App() {
           title="TA50"
           initiatives={ta50}
           pendingIds={pendingIds}
-          onStatusChange={updateStatus}
-          onEdit={setEditRecord}
+          onStatusChange={editMode ? updateStatus : undefined}
+          onEdit={editMode ? setEditRecord : undefined}
           subtasks={subtasks}
-          onAddSubtask={addSubtask}
-          onUpdateSubtask={updateSubtaskRecord}
-          onDeleteSubtask={removeSubtask}
+          onAddSubtask={editMode ? addSubtask : undefined}
+          onUpdateSubtask={editMode ? updateSubtaskRecord : undefined}
+          onDeleteSubtask={editMode ? removeSubtask : undefined}
+          editMode={editMode}
         />
       )}
       {(activeTab === "All" || activeTab === "Video RAG") && (
@@ -212,12 +231,13 @@ export default function App() {
           title="Video RAG"
           initiatives={videoRag}
           pendingIds={pendingIds}
-          onStatusChange={updateStatus}
-          onEdit={setEditRecord}
+          onStatusChange={editMode ? updateStatus : undefined}
+          onEdit={editMode ? setEditRecord : undefined}
           subtasks={subtasks}
-          onAddSubtask={addSubtask}
-          onUpdateSubtask={updateSubtaskRecord}
-          onDeleteSubtask={removeSubtask}
+          onAddSubtask={editMode ? addSubtask : undefined}
+          onUpdateSubtask={editMode ? updateSubtaskRecord : undefined}
+          onDeleteSubtask={editMode ? removeSubtask : undefined}
+          editMode={editMode}
         />
       )}
       </>}

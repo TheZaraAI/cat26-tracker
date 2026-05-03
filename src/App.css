@@ -1007,3 +1007,43 @@ body {
   padding-left: 4px;
   font-weight: 500;
 }
+
+/* ---- View/Edit Mode Toggle ---- */
+.btn-mode-view {
+  background: rgba(100, 116, 139, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-mode-view:hover {
+  background: rgba(100, 116, 139, 0.25);
+}
+.btn-mode-edit {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-mode-edit:hover {
+  background: rgba(34, 197, 94, 0.25);
+}
+.status-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.status-not-started { background: #F1EFE8; color: #444441; }
+.status-in-progress { background: #E6F1FB; color: #0C447C; }
+.status-blocked { background: #FCEBEB; color: #791F1F; }
+.status-closed { background: #E1F5EE; color: #085041; }
+.status-planning { background: #F0E6FB; color: #4A1D8E; }
