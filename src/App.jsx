@@ -8,6 +8,7 @@ import WorkstreamTabs from "./components/WorkstreamTabs";
 import FilterBar from "./components/FilterBar";
 import InitiativeTable from "./components/InitiativeTable";
 import EditModal from "./components/EditModal";
+import SuccessMarkers from "./components/SuccessMarkers";
 
 // ---------- Setup screen when env vars are missing ----------
 function SetupScreen() {
@@ -98,6 +99,7 @@ export default function App() {
   const [editRecord, setEditRecord] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [showAddSubtask, setShowAddSubtask] = useState(false);
+  const [showSuccessMarkers, setShowSuccessMarkers] = useState(false);
 
   // Filter initiatives
   const filtered = useMemo(() => {
@@ -152,6 +154,9 @@ export default function App() {
           <button className="btn btn-secondary" onClick={() => exportToExcel(initiatives)}>
             Export Excel
           </button>
+          <button className="btn btn-accent" onClick={() => setShowSuccessMarkers(true)}>
+            Success Markers
+          </button>
           <AddDropdown
             onAddMilestone={() => setShowAdd(true)}
             onAddSubtask={() => setShowAddSubtask(true)}
@@ -159,16 +164,22 @@ export default function App() {
         </div>
       </header>
 
-      {/* Dashboard */}
-      <ExecDashboard initiatives={initiatives} />
+      {/* Success Markers page */}
+      {showSuccessMarkers && (
+        <SuccessMarkers onBack={() => setShowSuccessMarkers(false)} />
+      )}
 
-      {/* Tabs */}
-      <WorkstreamTabs
+      {/* Dashboard — hide when viewing success markers */}
+      {!showSuccessMarkers && <ExecDashboard initiatives={initiatives} />}
+
+      {/* Tabs — hide when viewing success markers */}
+      {!showSuccessMarkers && <WorkstreamTabs
         active={activeTab}
         onChange={setActiveTab}
         initiatives={initiatives}
-      />
+      />}
 
+      {!showSuccessMarkers && <>
       {/* Filters */}
       <FilterBar filters={filters} onChange={setFilters} />
 
@@ -209,6 +220,7 @@ export default function App() {
           onDeleteSubtask={removeSubtask}
         />
       )}
+      </>}
 
       {/* Edit modal */}
       {editRecord && (

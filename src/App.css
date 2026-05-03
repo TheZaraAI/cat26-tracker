@@ -888,3 +888,114 @@ body {
   .exec-dashboard { grid-template-columns: 1fr; }
   .filter-bar { flex-direction: column; align-items: flex-start; }
 }
+
+/* ---- Success Markers Page ---- */
+.success-markers {
+  padding: 8px 0;
+}
+.success-markers-header {
+  margin-bottom: 24px;
+}
+.success-markers-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 12px 0 4px;
+}
+.success-markers-subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.success-workstream {
+  margin-bottom: 32px;
+}
+.success-workstream-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  border-left: 3px solid var(--accent);
+}
+.success-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 12px;
+}
+.success-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+.success-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.success-card-id {
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  color: var(--accent);
+}
+.success-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  flex: 1;
+}
+.success-priority-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.success-card-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+.success-criteria-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.success-criteria-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 4px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--bg-tertiary);
+}
+.success-criteria-item:last-child {
+  border-bottom: none;
+}
+.success-check {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.btn-accent {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-accent:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
