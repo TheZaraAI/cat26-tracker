@@ -999,3 +999,11 @@ body {
 .btn-accent:hover {
   background: rgba(59, 130, 246, 0.25);
 }
+
+.success-card-initiative {
+  font-size: 0.78rem;
+  color: var(--accent);
+  margin-bottom: 4px;
+  padding-left: 4px;
+  font-weight: 500;
+}
