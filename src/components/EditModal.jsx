@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { shortDate } from "../utils/dateHelpers";
 
 const WORKSTREAMS = ["TA50", "Video RAG"];
@@ -48,7 +48,12 @@ export default function EditModal({
   const [showSubtaskAdd, setShowSubtaskAdd] = useState(false);
   const [editingSubtask, setEditingSubtask] = useState(null);
 
+  // Only initialize form on mount or when record/mode changes — NOT on milestones refresh
+  const initRef = useRef(false);
   useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+
     if (mode === "subtask") {
       setSubtaskForm({
         Name: "",
@@ -75,7 +80,7 @@ export default function EditModal({
     } else {
       setForm(EMPTY);
     }
-  }, [record, mode, milestones]);
+  }, []);
 
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
