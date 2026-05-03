@@ -2,11 +2,12 @@ const PRIORITY_STYLES = {
   P1: { bg: "#FCEBEB", color: "#791F1F", border: "#F09595", label: "P1 Critical" },
   P2: { bg: "#FAEEDA", color: "#633806", border: "#FAC775", label: "P2 High" },
   P3: { bg: "#E1F5EE", color: "#085041", border: "#5DCAA5", label: "P3 Medium" },
+  P4: { bg: "#E8F5E1", color: "#2D5016", border: "#8BC47A", label: "P4 Low" },
   // Also handle raw Airtable values in case they leak through
   Critical: { bg: "#FCEBEB", color: "#791F1F", border: "#F09595", label: "P1 Critical" },
   High: { bg: "#FAEEDA", color: "#633806", border: "#FAC775", label: "P2 High" },
   Medium: { bg: "#E1F5EE", color: "#085041", border: "#5DCAA5", label: "P3 Medium" },
-  Low: { bg: "#F1EFE8", color: "#444441", border: "#D1D0C8", label: "P4 Low" },
+  Low: { bg: "#E8F5E1", color: "#2D5016", border: "#8BC47A", label: "P4 Low" },
 };
 
 const STATUS_STYLES = {

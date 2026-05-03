@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { shortDate } from "../utils/dateHelpers";
 
 const WORKSTREAMS = ["TA50", "Video RAG"];
-const PRIORITIES = ["P1", "P2", "P3"];
+const PRIORITIES = ["P1", "P2", "P3", "P4"];
 const STATUSES = ["Not started", "In progress", "Blocked", "Closed", "Planning"];
 const SUBTASK_STATUSES = ["Not Started", "In Progress", "Closed"];
 

@@ -1,4 +1,4 @@
-const PRIORITIES = ["P1", "P2", "P3"];
+const PRIORITIES = ["P1", "P2", "P3", "P4"];
 const STATUSES = ["Not started", "In progress", "Blocked", "Closed", "Planning"];
 
 export default function FilterBar({ filters, onChange }) {
