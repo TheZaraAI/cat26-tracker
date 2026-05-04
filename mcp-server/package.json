@@ -1,0 +1,16 @@
+{
+  "name": "cat26-tracker-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for the CAT26 Milestone Tracker (Airtable backend)",
+  "type": "module",
+  "bin": {
+    "cat26-tracker-mcp": "./index.js"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  }
+}
